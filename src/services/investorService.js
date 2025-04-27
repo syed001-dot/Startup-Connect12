@@ -2,8 +2,9 @@ import axios from 'axios';
 import authService from './authService';
 import { jwtDecode } from 'jwt-decode';
 
-const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
-
+const API_BASE = process.env.REACT_APP_API_URL
+  ? `${process.env.REACT_APP_API_URL}/api`
+  : 'http://localhost:8080/api';
 const getAuthHeaders = () => {
     const user = authService.getCurrentUser();
     if (!user || !user.token) {

@@ -3,8 +3,9 @@ import authService from './authService';
 import investorService from './investorService';
 import startupService from './startupService';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
-
+const API_BASE = process.env.REACT_APP_API_URL
+  ? `${process.env.REACT_APP_API_URL}/api`
+  : 'http://localhost:8080/api';
 const transactionService = {
   // Create a new transaction
   createTransaction: async (transaction) => {
