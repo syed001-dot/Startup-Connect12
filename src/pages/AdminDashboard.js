@@ -37,6 +37,8 @@ import {
 import { useNavigate } from 'react-router-dom';
 import authService from '../services/authService';
 
+const API_URL = process.env.REACT_APP_API_URL ? `${process.env.REACT_APP_API_URL}/api` : 'http://localhost:8080/api';
+
 // TabPanel component for tab content
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -94,7 +96,7 @@ const AdminDashboard = () => {
     try {
       if (tabValue === 0) {
         // Fetch users with full details
-        const response = await fetch('http://localhost:8080/api/admin/users', {
+        const response = await fetch(`${API_URL}/admin/users`, {
           headers: {
             'Authorization': `Bearer ${authService.getToken()}`
           }
@@ -113,7 +115,7 @@ const AdminDashboard = () => {
         setUsers(mappedUsers);
       } else if (tabValue === 1) {
         // Fetch investors with full details
-        const response = await fetch('http://localhost:8080/api/admin/investors', {
+        const response = await fetch(`${API_URL}/admin/investors`, {
           headers: {
             'Authorization': `Bearer ${authService.getToken()}`
           }
@@ -132,7 +134,7 @@ const AdminDashboard = () => {
         setInvestors(mappedInvestors);
       } else if (tabValue === 2) {
         // Fetch transactions with related data
-        const response = await fetch('http://localhost:8080/api/admin/transactions', {
+        const response = await fetch(`${API_URL}/admin/transactions`, {
           headers: {
             'Authorization': `Bearer ${authService.getToken()}`
           }
@@ -196,8 +198,8 @@ const AdminDashboard = () => {
       console.log('Selected item:', selectedItem);
       
       const endpoint = itemType === 'user' 
-        ? `http://localhost:8080/api/admin/users/${selectedItem.id}`
-        : `http://localhost:8080/api/admin/investors/${selectedItem.id}`;
+        ? `${API_URL}/admin/users/${selectedItem.id}`
+        : `${API_URL}/admin/investors/${selectedItem.id}`;
       
       console.log('Delete endpoint:', endpoint);
       
@@ -243,8 +245,8 @@ const AdminDashboard = () => {
       // No special case needed anymore as we're properly handling updates in the backend
       
       const endpoint = itemType === 'user' 
-        ? `http://localhost:8080/api/admin/users/${selectedItem.id}`
-        : `http://localhost:8080/api/admin/investors/${selectedItem.id}`;
+        ? `${API_URL}/admin/users/${selectedItem.id}`
+        : `${API_URL}/admin/investors/${selectedItem.id}`;
       
       console.log('Edit endpoint:', endpoint);
       
