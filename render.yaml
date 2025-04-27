@@ -3,7 +3,6 @@ services:
     name: startup-connect-backend
     runtime: docker
     buildCommand: cd startup-connect-backend && ./mvnw clean package -DskipTests
-    startCommand: cd startup-connect-backend && java -jar target/*.jar
     envVars:
       - key: SPRING_DATASOURCE_URL
         fromDatabase:
