@@ -1,29 +1,5 @@
 services:
   - type: web
-    name: startup-connect-backend
-    runtime: docker
-    buildCommand: cd startup-connect-backend && ./mvnw clean package -DskipTests
-    envVars:
-      - key: SPRING_DATASOURCE_URL
-        fromDatabase:
-          name: startup-connect-db
-          property: connectionString
-      - key: SPRING_DATASOURCE_USERNAME
-        fromDatabase:
-          name: startup-connect-db
-          property: user
-      - key: SPRING_DATASOURCE_PASSWORD
-        fromDatabase:
-          name: startup-connect-db
-          property: password
-      - key: SPRING_JPA_HIBERNATE_DDL_AUTO
-        value: update
-      - key: JWT_SECRET
-        generateValue: true
-      - key: SPRING_PROFILES_ACTIVE
-        value: prod
-
-  - type: web
     name: startup-connect-frontend
     env: node
     buildCommand: npm install && npm run build
@@ -31,9 +7,3 @@ services:
     envVars:
       - key: REACT_APP_API_URL
         value: https://startup-connect-backend.onrender.com
-
-databases:
-  - name: startup-connect-db
-    databaseName: startup_connect
-    user: startup_connect
-    plan: free 

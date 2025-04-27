@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: startup-connect-backend
+    runtime: docker
+    buildCommand: ./mvnw clean package -DskipTests
+    envVars:
+      - key: SPRING_DATASOURCE_URL
+        value: jdbc:postgresql://dpg-d07363k9c44c739l7iu0-a/st_myko
+      - key: SPRING_DATASOURCE_USERNAME
+        value: st_myko_user
+      - key: SPRING_DATASOURCE_PASSWORD
+        value: QmRzJ2T9ugSGnEqy9MZ1CjHgw9YFB3EG
+      - key: SPRING_JPA_HIBERNATE_DDL_AUTO
+        value: update
+      - key: JWT_SECRET
+        generateValue: true
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
