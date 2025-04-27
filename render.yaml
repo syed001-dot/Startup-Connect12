@@ -1,10 +1,41 @@
 services:
   - type: web
-    name: startup-connect
-    env: node
-    buildCommand: npm install && npm run build
-    startCommand: serve -s build
+    name: startup-connect-backend
+    env: java
+    buildCommand: cd startup-connect-backend && ./mvnw clean package -DskipTests
+    startCommand: cd startup-connect-backend && java -jar target/*.jar
     envVars:
-      - key: NODE_ENV
-        value: production
-    staticPublishPath: build 
+      - key: SPRING_DATASOURCE_URL
+        fromDatabase:
+          name: startup-connect-db
+          property: connectionString
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase:
+          name: startup-connect-db
+          property: username
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase:
+          name: startup-connect-db
+          property: password
+      - key: SPRING_JPA_HIBERNATE_DDL_AUTO
+        value: update
+      - key: JWT_SECRET
+        generateValue: true
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+
+  - type: static
+    name: startup-connect-frontend
+    env: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: build
+    envVars:
+      - key: REACT_APP_API_URL
+        sync: false
+        value: https://startup-connect-backend.onrender.com
+
+databases:
+  - name: startup-connect-db
+    databaseName: startup_connect
+    user: startup_connect
+    plan: free 
