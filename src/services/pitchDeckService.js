@@ -84,7 +84,8 @@ const pitchDeckService = {
             return response.data;
         } catch (error) {
             console.error('Error uploading pitch deck:', error);
-            throw new Error(error.response?.data?.message || 'Failed to upload pitch deck');
+            const errorMessage = error.response?.data || error.message;
+            throw new Error(`Failed to upload pitch deck: ${errorMessage}`);
         }
     },
 

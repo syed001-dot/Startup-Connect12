@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: startup-connect
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: serve -s build
+    envVars:
+      - key: NODE_ENV
+        value: production
+    staticPublishPath: build 

@@ -99,8 +99,8 @@ const PitchDeckManager = ({ startupId, onUpdate }) => {
             }
             fetchPitchDecks();
         } catch (err) {
-            setError('Failed to upload pitch deck. Please try again.');
             console.error('Error uploading pitch deck:', err);
+            setError(err.message || 'Failed to upload pitch deck. Please try again.');
         } finally {
             setLoading(false);
         }

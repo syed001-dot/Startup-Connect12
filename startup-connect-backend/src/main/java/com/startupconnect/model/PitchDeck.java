@@ -22,9 +22,6 @@ public class PitchDeck {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "file_path", nullable = false)
-    private String filePath;
-
     @Column(name = "file_name", nullable = false)
     private String fileName;
 
@@ -33,6 +30,9 @@ public class PitchDeck {
 
     @Column(name = "file_type")
     private String fileType;
+
+    @Column(name = "file_content", columnDefinition = "bytea")
+    private byte[] fileContent;
 
     @Column(name = "version")
     private Integer version = 1;
