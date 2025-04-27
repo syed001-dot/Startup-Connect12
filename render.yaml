@@ -1,9 +1,0 @@
-services:
-  - type: web
-    name: startup-connect-frontend
-    env: node
-    buildCommand: npm install && npm run build
-    startCommand: serve -s build
-    envVars:
-      - key: REACT_APP_API_URL
-        value: https://startup-connect-backend.onrender.com
