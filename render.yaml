@@ -1,7 +1,7 @@
 services:
   - type: web
     name: startup-connect-backend
-    env: java
+    runtime: docker
     buildCommand: cd startup-connect-backend && ./mvnw clean package -DskipTests
     startCommand: cd startup-connect-backend && java -jar target/*.jar
     envVars:
@@ -12,7 +12,7 @@ services:
       - key: SPRING_DATASOURCE_USERNAME
         fromDatabase:
           name: startup-connect-db
-          property: username
+          property: user
       - key: SPRING_DATASOURCE_PASSWORD
         fromDatabase:
           name: startup-connect-db
@@ -31,7 +31,6 @@ services:
     startCommand: serve -s build
     envVars:
       - key: REACT_APP_API_URL
-        sync: false
         value: https://startup-connect-backend.onrender.com
 
 databases:
