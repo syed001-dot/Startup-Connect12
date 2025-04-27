@@ -24,11 +24,11 @@ services:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
 
-  - type: static
+  - type: web
     name: startup-connect-frontend
-    env: static
+    env: node
     buildCommand: npm install && npm run build
-    staticPublishPath: build
+    startCommand: serve -s build
     envVars:
       - key: REACT_APP_API_URL
         sync: false
