@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL ? `${process.env.REACT_APP_API_URL}/api/negotiations` : 'http://localhost:8080/api/negotiations';
+const API_URL = process.env.REACT_APP_API_URL
+  ? `${process.env.REACT_APP_API_URL}/negotiations`
+  : 'http://localhost:8080/api/negotiations';
 
 export const negotiationService = {
     createOffer: async (offerData) => {
