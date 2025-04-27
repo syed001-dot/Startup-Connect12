@@ -44,7 +44,14 @@ const Footer = () => {
               <IconButton color="inherit" aria-label="LinkedIn">
                 <LinkedInIcon />
               </IconButton>
-              <IconButton color="inherit" aria-label="Instagram">
+              <IconButton 
+                color="inherit" 
+                aria-label="Instagram"
+                component="a"
+                href="https://www.instagram.com/syed.k.ahmed.29?igsh=b3ViZDI0ajhlNjN5"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <InstagramIcon />
               </IconButton>
             </Box>
@@ -67,9 +74,7 @@ const Footer = () => {
               <Link href="/investors" color="inherit" sx={{ mb: 1 }}>
                 Investors
               </Link>
-              <Link href="/contact" color="inherit">
-                Contact Us
-              </Link>
+              
             </Box>
           </Grid>
           

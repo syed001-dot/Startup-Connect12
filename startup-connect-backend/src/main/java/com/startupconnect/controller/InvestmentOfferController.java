@@ -133,7 +133,7 @@ public class InvestmentOfferController {
     public ResponseEntity<?> updateOfferStatus(
             @PathVariable Long startupId,
             @PathVariable Long offerId,
-            @RequestParam InvestmentOffer.OfferStatus status) {
+            @RequestParam String status) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (authentication == null || !authentication.isAuthenticated()) {
@@ -149,8 +149,16 @@ public class InvestmentOfferController {
             StartupProfile startup = startupProfileRepository.findById(startupId)
                 .orElseThrow(() -> new RuntimeException("Startup not found"));
 
+            // Convert string status to enum
+            InvestmentOffer.OfferStatus offerStatus;
+            try {
+                offerStatus = InvestmentOffer.OfferStatus.valueOf(status.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest().body("Invalid status: " + status);
+            }
+
             // Allow any authenticated user to update offer status
-            investmentOfferService.updateOfferStatus(startupId, offerId, status);
+            investmentOfferService.updateOfferStatus(startupId, offerId, offerStatus);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());

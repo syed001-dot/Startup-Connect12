@@ -59,8 +59,12 @@ const authService = {
     },
 
     getToken: () => {
-        const user = JSON.parse(localStorage.getItem('user'));
-        return user?.token;
+        const userData = JSON.parse(localStorage.getItem('user'));
+        console.log('User data from localStorage:', userData);
+        // Check if token is directly on the object or nested in a 'user' property
+        const token = userData?.token || userData?.user?.token;
+        console.log('Extracted token:', token);
+        return token;
     },
 
     updatePassword: async (userId, newPassword) => {

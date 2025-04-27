@@ -191,52 +191,92 @@ const AdminDashboard = () => {
 
   const handleDeleteConfirm = async () => {
     try {
+      const token = authService.getToken();
+      console.log('Token being used for delete:', token);
+      console.log('Selected item:', selectedItem);
+      
       const endpoint = itemType === 'user' 
         ? `http://localhost:8080/api/admin/users/${selectedItem.id}`
         : `http://localhost:8080/api/admin/investors/${selectedItem.id}`;
       
+      console.log('Delete endpoint:', endpoint);
+      
       const response = await fetch(endpoint, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${authService.getToken()}`
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
       });
       
+      console.log('Delete response status:', response.status);
+      console.log('Delete response ok:', response.ok);
+      
       if (!response.ok) {
-        throw new Error(`Failed to delete ${itemType}`);
+        // Try to get more details from the response
+        let errorText = '';
+        try {
+          errorText = await response.text();
+          console.log('Error response text:', errorText);
+        } catch (textError) {
+          console.log('Could not get response text:', textError);
+        }
+        throw new Error(`Failed to delete ${itemType}: ${response.status} ${errorText}`);
       }
       
       // Refresh data
       fetchData();
       setDeleteDialogOpen(false);
     } catch (err) {
+      console.error('Delete error:', err);
       setError(err.message || `An error occurred while deleting ${itemType}`);
     }
   };
 
   const handleEditSubmit = async () => {
     try {
+      const token = authService.getToken();
+      console.log('Token being used for edit:', token);
+      console.log('Edit form data:', editForm);
+      console.log('Selected item:', selectedItem);
+      
+      // No special case needed anymore as we're properly handling updates in the backend
+      
       const endpoint = itemType === 'user' 
         ? `http://localhost:8080/api/admin/users/${selectedItem.id}`
         : `http://localhost:8080/api/admin/investors/${selectedItem.id}`;
+      
+      console.log('Edit endpoint:', endpoint);
       
       const response = await fetch(endpoint, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authService.getToken()}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(editForm)
       });
       
+      console.log('Edit response status:', response.status);
+      console.log('Edit response ok:', response.ok);
+      
       if (!response.ok) {
-        throw new Error(`Failed to update ${itemType}`);
+        // Try to get more details from the response
+        let errorText = '';
+        try {
+          errorText = await response.text();
+          console.log('Error response text:', errorText);
+        } catch (textError) {
+          console.log('Could not get response text:', textError);
+        }
+        throw new Error(`Failed to update ${itemType}: ${response.status} ${errorText}`);
       }
       
       // Refresh data
       fetchData();
       setEditDialogOpen(false);
     } catch (err) {
+      console.error('Edit error:', err);
       setError(err.message || `An error occurred while updating ${itemType}`);
     }
   };
@@ -386,14 +426,6 @@ const AdminDashboard = () => {
                             <ViewIcon />
                           </IconButton>
                         </Tooltip>
-                        <Tooltip title="Edit User">
-                          <IconButton 
-                            size="small" 
-                            onClick={() => handleEditClick(user, 'user')}
-                          >
-                            <EditIcon />
-                          </IconButton>
-                        </Tooltip>
                         <Tooltip title="Delete User">
                           <IconButton 
                             size="small" 
@@ -439,7 +471,7 @@ const AdminDashboard = () => {
                   <TableRow>
                     <TableCell>ID</TableCell>
                     <TableCell>Name</TableCell>
-                    <TableCell>Email</TableCell>
+                    <TableCell>Location</TableCell>
                     <TableCell>Investment Focus</TableCell>
                     <TableCell>Min Investment</TableCell>
                     <TableCell>Status</TableCell>
@@ -458,9 +490,9 @@ const AdminDashboard = () => {
                           {investor.name}
                         </Box>
                       </TableCell>
-                      <TableCell>{investor.email}</TableCell>
+                      <TableCell>{investor.location}</TableCell>
                       <TableCell>{investor.investmentFocus}</TableCell>
-                      <TableCell>${investor.minInvestmentAmount}</TableCell>
+                      <TableCell>${investor.investmentRangeMin}</TableCell>
                       <TableCell>
                         <Chip 
                           label={investor.status} 
@@ -475,14 +507,6 @@ const AdminDashboard = () => {
                             onClick={() => handleViewClick(investor, 'investor')}
                           >
                             <ViewIcon />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Edit Investor">
-                          <IconButton 
-                            size="small" 
-                            onClick={() => handleEditClick(investor, 'investor')}
-                          >
-                            <EditIcon />
                           </IconButton>
                         </Tooltip>
                         <Tooltip title="Delete Investor">

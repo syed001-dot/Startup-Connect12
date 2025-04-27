@@ -50,7 +50,8 @@ public class InvestmentOffer {
     public enum OfferStatus {
         ACTIVE,
         CLOSED,
-        EXPIRED
+        EXPIRED,
+        NEGOTIATING
     }
 
     public User getInvestor() { return investor; }

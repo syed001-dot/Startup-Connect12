@@ -66,7 +66,7 @@ public class JwtTokenUtil {
         return claimsResolver.apply(claims);
     }
 
-    private Claims extractAllClaims(String token) {
+    public Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
@@ -77,4 +77,21 @@ public class JwtTokenUtil {
     private Boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
-} 
+
+    // Add this method to extract roles from the JWT claims
+    public java.util.List<String> extractRoles(String token) {
+        final Claims claims = extractAllClaims(token);
+        Object rolesObj = claims.get("roles");
+        if (rolesObj instanceof java.util.List<?>) {
+            // If stored as List
+            return ((java.util.List<?>) rolesObj).stream().map(String::valueOf).toList();
+        } else if (rolesObj instanceof String[]) {
+            // If stored as array
+            return java.util.Arrays.asList((String[]) rolesObj);
+        } else if (rolesObj instanceof Object[]) {
+            return java.util.Arrays.stream((Object[]) rolesObj).map(String::valueOf).toList();
+        }
+        return java.util.Collections.emptyList();
+    }
+}
+ 

@@ -14,16 +14,17 @@ import StartupProfile from './pages/StartupProfile';
 import InvestorInvestments from "./pages/InvestorInvestments";
 import TransactionPage from "./pages/TransactionPage";
 import InvestorProfile from './pages/InvestorProfile';
+import About from './pages/About';
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
 // Error boundary component
 const ErrorBoundary = ({ children }) => {
   const [hasError, setHasError] = React.useState(false);
-  const [error, setError] = React.useState(null);
 
   React.useEffect(() => {
-    const handleError = (error) => {
+    const handleError = () => {
       setHasError(true);
-      setError(error);
     };
 
     window.addEventListener('error', handleError);
@@ -123,6 +124,8 @@ function App() {
                   <Route path="/register" element={<Register />} /> {/*src\pages\Register.js */}
                   <Route path="/register-admin" element={<RegisterAdmin />} />
                   <Route path="/startups" element={<Startups />} />
+                  <Route path="/about" element={<About />} />
+              
                   <Route
                     path="/investors"
                     element={

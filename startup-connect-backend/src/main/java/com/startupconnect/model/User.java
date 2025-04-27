@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
 
-@JsonIgnoreProperties({"startupProfile", "investorProfile", "password", "createdAt", "updatedAt"})
+@JsonIgnoreProperties({"startupProfile", "investorProfile", "password", "updatedAt"})
 @Entity
 @Data
 @Table(name = "users")

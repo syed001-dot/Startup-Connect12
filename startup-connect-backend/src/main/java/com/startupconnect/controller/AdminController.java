@@ -6,6 +6,7 @@ import com.startupconnect.model.Transaction;
 import com.startupconnect.dto.TransactionDTO;
 import com.startupconnect.service.AdminService;
 import com.startupconnect.service.TransactionService;
+import com.startupconnect.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +24,9 @@ public class AdminController {
     
     @Autowired
     private TransactionService transactionService;
+    
+    @Autowired
+    private UserRepository userRepository;
 
     // User management endpoints
     @GetMapping("/users")
@@ -44,6 +48,27 @@ public class AdminController {
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         adminService.deleteUser(id);
         return ResponseEntity.ok().build();
+    }
+    
+    // Temporary test endpoint for debugging
+    @GetMapping("/test/delete-user/{id}")
+    public ResponseEntity<String> testDeleteUser(@PathVariable Long id) {
+        try {
+            User user = userRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+            
+            // Log user details before deletion
+            System.out.println("Attempting to delete user: " + user.getId() + " - " + user.getEmail());
+            
+            // Try direct repository deletion
+            userRepository.delete(user);
+            userRepository.flush(); // Force immediate deletion
+            
+            return ResponseEntity.ok("User deleted successfully: " + id);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Error deleting user: " + e.getMessage());
+        }
     }
 
     // Investor management endpoints

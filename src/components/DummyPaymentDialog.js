@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, TextField, Box, Alert, InputLabel, MenuItem, Select, FormControl, Grid, IconButton
+  Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, TextField, Box, Alert, InputLabel, MenuItem, Select, FormControl, Grid
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
@@ -19,6 +19,12 @@ const DummyPaymentDialog = ({ open, amount, onClose, onPaymentConfirmed, startup
   const [accHolder, setAccHolder] = useState('');
   const [accNumber, setAccNumber] = useState('');
   const [ifsc, setIfsc] = useState('');
+
+  // Field validation errors
+  const [expiryError, setExpiryError] = useState('');
+  const [accHolderError, setAccHolderError] = useState('');
+  const [accNumberError, setAccNumberError] = useState('');
+
   // Screenshot upload (UPI only)
   const [file, setFile] = useState(null);
   const [fileError, setFileError] = useState('');
@@ -28,6 +34,7 @@ const DummyPaymentDialog = ({ open, amount, onClose, onPaymentConfirmed, startup
     setUpiId('');
     setBankName(''); setAccHolder(''); setAccNumber(''); setIfsc('');
     setFile(null); setFileError('');
+    setExpiryError(''); setAccHolderError(''); setAccNumberError('');
   };
 
   const handlePay = async () => {
@@ -47,6 +54,14 @@ const DummyPaymentDialog = ({ open, amount, onClose, onPaymentConfirmed, startup
         if (!/^\d{3,4}$/.test(cvv)) {
           throw new Error('CVV must be 3 or 4 digits.');
         }
+        if (expiryError) {
+          throw new Error('Please enter a valid expiry date.');
+        }
+      } else if (method === 'bank') {
+        if (!accHolder) throw new Error('Please enter account holder name.');
+        if (!accNumber) throw new Error('Please enter account number.');
+        if (accHolderError) throw new Error('Invalid account holder name.');
+        if (accNumberError) throw new Error('Invalid account number.');
       } else if (method === 'upi') {
         if (!upiId) {
           throw new Error('Please enter your UPI ID.');
@@ -60,16 +75,6 @@ const DummyPaymentDialog = ({ open, amount, onClose, onPaymentConfirmed, startup
         const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
         if (!allowedTypes.includes(file.type)) {
           throw new Error('Only .jpg, .png, or .pdf files are allowed.');
-        }
-      } else if (method === 'bank') {
-        if (!bankName || !accHolder || !accNumber || !ifsc) {
-          throw new Error('Please fill all bank transfer details.');
-        }
-        if (!/^\d{9,18}$/.test(accNumber)) {
-          throw new Error('Account Number must be 9-18 digits.');
-        }
-        if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifsc)) {
-          throw new Error('Invalid IFSC code.');
         }
       }
 
@@ -147,11 +152,41 @@ const DummyPaymentDialog = ({ open, amount, onClose, onPaymentConfirmed, startup
                 <TextField
                   label="Expiry (MM/YY)"
                   value={expiry}
-                  onChange={e => setExpiry(e.target.value)}
+                  onChange={e => {
+                    // Only allow digits and /
+                    let val = e.target.value.replace(/[^\d/]/g, '');
+                    // Auto-insert slash
+                    if (val.length === 2 && expiry.length === 1) val += '/';
+                    if (val.length > 5) val = val.slice(0, 5);
+                    setExpiry(val);
+
+                    // Validate format
+                    let err = '';
+                    if (val.length === 5) {
+                      const [mm, yy] = val.split('/');
+                      const month = parseInt(mm, 10);
+                      const year = parseInt(yy, 10);
+                      const now = new Date();
+                      const curYear = now.getFullYear() % 100;
+                      const curMonth = now.getMonth() + 1;
+                      if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(val)) {
+                        err = 'Format MM/YY';
+                      } else if (month < 1 || month > 12) {
+                        err = 'Invalid month';
+                      } else if (year < curYear || (year === curYear && month < curMonth)) {
+                        err = 'Card expired';
+                      }
+                    } else if (val.length > 0 && val.length < 5) {
+                      err = 'Format MM/YY';
+                    }
+                    setExpiryError(err);
+                  }}
                   fullWidth
                   disabled={processing}
                   placeholder="MM/YY"
                   sx={{ mb: 2 }}
+                  error={!!expiryError}
+                  helperText={expiryError}
                 />
               </Grid>
               <Grid item xs={6}>
@@ -197,21 +232,34 @@ const DummyPaymentDialog = ({ open, amount, onClose, onPaymentConfirmed, startup
                 <TextField
                   label="Account Holder Name"
                   value={accHolder}
-                  onChange={e => setAccHolder(e.target.value)}
+                  onChange={e => {
+                    // Only allow alphabets and spaces
+                    const val = e.target.value.replace(/[^a-zA-Z ]/g, '');
+                    setAccHolder(val);
+                    setAccHolderError(val && !/^[A-Za-z ]+$/.test(val) ? 'Only alphabets allowed' : '');
+                  }}
                   fullWidth
                   disabled={processing}
                   sx={{ mb: 2 }}
+                  error={!!accHolderError}
+                  helperText={accHolderError}
                 />
               </Grid>
               <Grid item xs={12}>
                 <TextField
                   label="Account Number"
                   value={accNumber}
-                  onChange={e => setAccNumber(e.target.value.replace(/[^\d]/g, '').slice(0,18))}
+                  onChange={e => {
+                    const val = e.target.value.replace(/[^\d]/g, '').slice(0, 18);
+                    setAccNumber(val);
+                    setAccNumberError(val && !/^\d{1,18}$/.test(val) ? 'Only numbers allowed' : '');
+                  }}
                   fullWidth
                   disabled={processing}
                   sx={{ mb: 2 }}
                   inputProps={{ maxLength: 18 }}
+                  error={!!accNumberError}
+                  helperText={accNumberError}
                 />
               </Grid>
               <Grid item xs={12}>

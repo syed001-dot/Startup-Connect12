@@ -41,6 +41,8 @@ import transactionService from '../services/transactionService';
 import authService from '../services/authService';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
+import startupService from '../services/startupService';
+import investorService from '../services/investorService';
 
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -76,6 +78,8 @@ const InvestorInvestments = () => {
         investmentsByStatus: []
     });
 
+    const [negotiatingOffers, setNegotiatingOffers] = useState([]);
+
     const COLORS = [
         theme.palette.primary.main,
         theme.palette.secondary.main,
@@ -109,18 +113,19 @@ const InvestorInvestments = () => {
             setTransactions(data);
 
             // Calculate analytics
-            const total = data.reduce((sum, tx) => sum + (tx.amount || 0), 0);
-            const uniqueStartups = new Set(data.map(tx => tx.startupId)).size;
-            const average = total / (data.length || 1);
+            const acceptedTransactions = data.filter(tx => tx.status === 'ACCEPTED');
+            const total = acceptedTransactions.reduce((sum, tx) => sum + (tx.amount || 0), 0);
+            const uniqueStartups = new Set(acceptedTransactions.map(tx => tx.startupId)).size;
+            const average = total / (acceptedTransactions.length || 1);
 
-            // Calculate investments by stage
-            const stageData = data.reduce((acc, tx) => {
+            // Calculate investments by stage (only accepted)
+            const stageData = acceptedTransactions.reduce((acc, tx) => {
                 const stage = tx.startupStage || 'Unknown';
                 acc[stage] = (acc[stage] || 0) + (tx.amount || 0);
                 return acc;
             }, {});
 
-            // Calculate investments by status
+            // Calculate investments by status (all for chart)
             const statusData = data.reduce((acc, tx) => {
                 const status = tx.status || 'Unknown';
                 acc[status] = (acc[status] || 0) + (tx.amount || 0);
@@ -154,6 +159,16 @@ const InvestorInvestments = () => {
         }
     };
 
+    const fetchNegotiatingOffers = async (investorId) => {
+        try {
+            const offers = await startupService.getMyInvestmentOffers();
+            // Only include offers that are still negotiating (not closed)
+            setNegotiatingOffers(offers.filter(o => o.status === 'NEGOTIATING' && o.investorId === investorId));
+        } catch (err) {
+            console.error('Error fetching negotiating offers:', err);
+        }
+    };
+
     const checkAuthAndFetchData = useCallback(async () => {
         try {
             const user = authService.getCurrentUser();
@@ -167,14 +182,15 @@ const InvestorInvestments = () => {
 
             const hasInvestorRole = user.user?.role === 'INVESTOR';
             let tokenRoles = [];
-            
+            let investorProfile = null;
             try {
                 if (user.token) {
                     const decodedToken = jwtDecode(user.token);
                     tokenRoles = decodedToken.roles || [];
                 }
+                investorProfile = await investorService.getInvestorProfile();
             } catch (err) {
-                console.error('Error decoding token:', err);
+                console.error('Error decoding token or fetching profile:', err);
             }
 
             const hasInvestorAccess = hasInvestorRole || 
@@ -186,6 +202,9 @@ const InvestorInvestments = () => {
             }
 
             await fetchTransactions();
+            if (investorProfile && investorProfile.id) {
+                await fetchNegotiatingOffers(investorProfile.id);
+            }
         } catch (err) {
             console.error('Auth check error:', err);
             setError(err.message);
@@ -268,15 +287,30 @@ const InvestorInvestments = () => {
         link.click();
     };
 
+    const allRows = useMemo(() => [
+        ...transactions,
+        ...negotiatingOffers.map(offer => ({
+            id: offer.id,
+            startupName: offer.companyName,
+            amount: offer.amount,
+            transactionType: 'NEGOTIATION',
+            transactionDate: offer.updatedAt || offer.createdAt,
+            // If offer is closed, treat as REJECTED
+            status: offer.status === 'CLOSED' ? 'REJECTED' : 'NEGOTIATING',
+            startupStage: offer.fundingStage || offer.stage,
+            // Add other fields as needed for your table
+        }))
+    ], [transactions, negotiatingOffers]);
+
     const filteredTransactions = useMemo(() => {
-        return transactions
+        return allRows
             .filter(tx => {
                 const matchesSearch = searchTerm === '' ||
                     getStartupDisplayName(tx).toLowerCase().includes(searchTerm.toLowerCase()) ||
                     (tx.startupStage || '').toLowerCase().includes(searchTerm.toLowerCase());
-                
-                const matchesStatus = statusFilter === 'all' || tx.status === statusFilter;
-                
+                const matchesStatus = statusFilter === 'all' ||
+                    tx.status === statusFilter ||
+                    (statusFilter === 'PENDING' && tx.status === 'NEGOTIATING');
                 const matchesDate = dateFilter === 'all' || (() => {
                     const txDate = new Date(tx.transactionDate);
                     const now = new Date();
@@ -293,7 +327,6 @@ const InvestorInvestments = () => {
                             return true;
                     }
                 })();
-
                 return matchesSearch && matchesStatus && matchesDate;
             })
             .sort((a, b) => {
@@ -304,7 +337,7 @@ const InvestorInvestments = () => {
                     ? aValue < bValue ? -1 : 1
                     : bValue < aValue ? -1 : 1;
             });
-    }, [transactions, searchTerm, statusFilter, dateFilter, orderBy, order]);
+    }, [allRows, searchTerm, statusFilter, dateFilter, orderBy, order]);
 
     const paginatedTransactions = filteredTransactions.slice(
         page * rowsPerPage,

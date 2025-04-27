@@ -82,10 +82,20 @@ const Navbar = () => {
                 variant="h6"
                 noWrap
                 sx={{
+                  mr: 2,
                   display: { xs: 'none', md: 'flex' },
+                  flexGrow: 1,
                   fontWeight: 700,
                   color: 'inherit',
                   textDecoration: 'none',
+                  fontFamily: `'Pacifico', 'Dancing Script', 'cursive'`,
+                  fontSize: '2.1rem',
+                  letterSpacing: '2px',
+                  textShadow: '2px 2px 8px #003366, 0 1px 10px #fff',
+                  background: 'linear-gradient(90deg, #fff 0%, #1bffff 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  filter: 'brightness(1.2)',
                 }}
               >
                 Startup Connect

@@ -34,6 +34,31 @@ public class Transaction {
     @Column
     private String description;
 
+    // New negotiation-related fields
+    @Column
+    private Double proposedAmount;
+
+    @Column
+    private Double equityPercentage;
+
+    @Column
+    private String negotiationStatus;
+
+    @Column
+    private Integer negotiationRound;
+
+    @Column
+    private ZonedDateTime lastNegotiationDate;
+
+    @Column
+    private String negotiationNotes;
+
+    @Column
+    private Boolean isCounterOffer;
+
+    @Column
+    private String rejectionReason;
+
     // Getters and Setters
     public Long getId() {
         return id;
@@ -99,15 +124,89 @@ public class Transaction {
         this.description = description;
     }
 
+    // New getters and setters for negotiation fields
+    public Double getProposedAmount() {
+        return proposedAmount;
+    }
+
+    public void setProposedAmount(Double proposedAmount) {
+        this.proposedAmount = proposedAmount;
+    }
+
+    public Double getEquityPercentage() {
+        return equityPercentage;
+    }
+
+    public void setEquityPercentage(Double equityPercentage) {
+        this.equityPercentage = equityPercentage;
+    }
+
+    public String getNegotiationStatus() {
+        return negotiationStatus;
+    }
+
+    public void setNegotiationStatus(String negotiationStatus) {
+        this.negotiationStatus = negotiationStatus;
+    }
+
+    public Integer getNegotiationRound() {
+        return negotiationRound;
+    }
+
+    public void setNegotiationRound(Integer negotiationRound) {
+        this.negotiationRound = negotiationRound;
+    }
+
+    public ZonedDateTime getLastNegotiationDate() {
+        return lastNegotiationDate;
+    }
+
+    public void setLastNegotiationDate(ZonedDateTime lastNegotiationDate) {
+        this.lastNegotiationDate = lastNegotiationDate;
+    }
+
+    public String getNegotiationNotes() {
+        return negotiationNotes;
+    }
+
+    public void setNegotiationNotes(String negotiationNotes) {
+        this.negotiationNotes = negotiationNotes;
+    }
+
+    public Boolean getIsCounterOffer() {
+        return isCounterOffer;
+    }
+
+    public void setIsCounterOffer(Boolean isCounterOffer) {
+        this.isCounterOffer = isCounterOffer;
+    }
+
+    public String getRejectionReason() {
+        return rejectionReason;
+    }
+
+    public void setRejectionReason(String rejectionReason) {
+        this.rejectionReason = rejectionReason;
+    }
+
     @PrePersist
     protected void onCreate() {
         if (transactionDate == null) {
             transactionDate = ZonedDateTime.now(java.time.ZoneOffset.UTC);
         }
+        if (negotiationStatus == null) {
+            negotiationStatus = "PENDING";
+        }
+        if (negotiationRound == null) {
+            negotiationRound = 1;
+        }
+        if (lastNegotiationDate == null) {
+            lastNegotiationDate = ZonedDateTime.now(java.time.ZoneOffset.UTC);
+        }
     }
 
     @PreUpdate
     protected void onUpdate() {
-        // No need to update the transaction date on updates
+        lastNegotiationDate = ZonedDateTime.now(java.time.ZoneOffset.UTC);
     }
 } 

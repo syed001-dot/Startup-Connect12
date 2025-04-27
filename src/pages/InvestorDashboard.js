@@ -613,35 +613,18 @@ const InvestorDashboard = () => {
                     key={index}
                     button={activity.type === 'message'}
                     onClick={activity.type === 'message' ? async () => {
-                      const targetUserId = activity.userId || activity.senderId || activity.receiverId;
-                      if (!targetUserId) {
-                        alert('No user information found for this notification.');
-                        return;
-                      }
-                      setReceiverId(targetUserId);
-                      try {
-                        const userObj = await require('../services/userService').default.getUserById(targetUserId);
-                        setReceiverName(userObj.fullName || userObj.email);
-                      } catch {
-                        setReceiverName('User');
-                      }
-                      
-                      // Mark notification as read before opening message dialog
+                      // Only mark notification as read, do not open chat dialog
                       if (activity.unread || activity.status === 'unread') {
                         try {
                           await notificationService.markNotificationsAsRead([activity.id]);
-                          // Update the activities list to mark this notification as read
                           setRecentActivities(prev =>
                             prev.map(a => a.id === activity.id ? { ...a, status: 'read', unread: false } : a)
                           );
-                          // Update unread count
                           setUnreadCount(prev => Math.max(0, prev - 1));
                         } catch (e) {
                           console.error('Error marking notification as read:', e);
                         }
                       }
-                      
-                      setMessageDialogOpen(true);
                     } : undefined}
                     sx={{
                       bgcolor: (activity.unread || activity.status === 'unread') ? 'rgba(25, 118, 210, 0.08)' : 'transparent',

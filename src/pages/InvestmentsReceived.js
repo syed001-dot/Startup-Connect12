@@ -43,6 +43,8 @@ import {
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
 import transactionService from '../services/transactionService';
 import { useNavigate } from 'react-router-dom';
+import startupService from '../services/startupService';
+import messageService from '../services/messageService';
 
 const InvestmentsReceived = () => {
   const theme = useTheme();
@@ -72,8 +74,11 @@ const InvestmentsReceived = () => {
     monthlyTrends: []
   });
 
+  const [negotiatingOffers, setNegotiatingOffers] = useState([]);
+
   useEffect(() => {
     fetchTransactions();
+    fetchNegotiatingOffers();
   }, []);
 
   const fetchTransactions = async () => {
@@ -84,12 +89,13 @@ const InvestmentsReceived = () => {
       setTransactions(data);
       
       // Calculate analytics
-      const total = data.reduce((sum, tx) => sum + (tx.amount || 0), 0);
-      const average = total / (data.length || 1);
-      const uniqueInvestors = new Set(data.map(tx => tx.investorId)).size;
+      const acceptedTransactions = data.filter(tx => tx.status === 'ACCEPTED');
+      const total = acceptedTransactions.reduce((sum, tx) => sum + (tx.amount || 0), 0);
+      const average = total / (acceptedTransactions.length || 1);
+      const uniqueInvestors = new Set(acceptedTransactions.map(tx => tx.investorId)).size;
       
-      // Calculate monthly trends
-      const monthlyData = data.reduce((acc, tx) => {
+      // Calculate monthly trends (only accepted)
+      const monthlyData = acceptedTransactions.reduce((acc, tx) => {
         const month = new Date(tx.transactionDate).toLocaleString('default', { month: 'short' });
         acc[month] = (acc[month] || 0) + (tx.amount || 0);
         return acc;
@@ -111,6 +117,50 @@ const InvestmentsReceived = () => {
       setError(err.message || 'Failed to fetch transactions');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Helper to fetch investor name from messages
+  const getInvestorNameFromMessages = async (offer) => {
+    try {
+      if (!offer.userId || !offer.investorId) return 'Unknown Investor';
+      const messages = await messageService.getConversation(offer.userId, offer.investorId);
+      if (messages && messages.length > 0) {
+        // You may need to fetch the user by senderId to get the name
+        // If your message DTO only has senderId, fetch user details:
+        const senderId = messages[0].senderId;
+        // Fetch user details from backend
+        const res = await fetch(`/api/messages/user/${senderId}`);
+        if (res.ok) {
+          const user = await res.json();
+          return user.fullName || user.email || `Investor #${senderId}`;
+        }
+        return `Investor #${senderId}`;
+      }
+    } catch (err) {
+      console.error('Error fetching messages for offer:', offer.id, err);
+    }
+    return 'Unknown Investor';
+  };
+
+  const fetchNegotiatingOffers = async () => {
+    try {
+      const startupProfile = await startupService.getStartupProfile();
+      if (!startupProfile || !startupProfile.id) return;
+      const offers = await startupService.getInvestmentOffers(startupProfile.id);
+      // Only include offers that are still negotiating (not closed)
+      const negotiating = offers.filter(o => o.status === 'NEGOTIATING');
+      // Fetch names for offers missing investorName
+      const offersWithNames = await Promise.all(negotiating.map(async offer => {
+        if (!offer.investorName && offer.userId && offer.investorId) {
+          const name = await getInvestorNameFromMessages(offer);
+          return { ...offer, investorName: name };
+        }
+        return offer;
+      }));
+      setNegotiatingOffers(offersWithNames);
+    } catch (err) {
+      console.error('Error fetching negotiating offers:', err);
     }
   };
 
@@ -190,15 +240,30 @@ const InvestmentsReceived = () => {
     link.click();
   };
 
+  const allRows = useMemo(() => [
+    ...transactions,
+    ...negotiatingOffers.map(offer => ({
+      id: offer.id,
+      investorName: offer.investorName || offer.investorDetails?.companyName || offer.investorCompanyName || (offer.investorId ? `Investor #${offer.investorId}` : 'Unknown Investor'),
+      startupName: offer.companyName,
+      amount: offer.amount,
+      transactionType: 'NEGOTIATION',
+      transactionDate: offer.updatedAt || offer.createdAt,
+      // If offer is closed, treat as REJECTED
+      status: offer.status === 'CLOSED' ? 'REJECTED' : 'NEGOTIATING',
+      // Add other fields as needed for your table
+    }))
+  ], [transactions, negotiatingOffers]);
+
   const filteredTransactions = useMemo(() => {
-    return transactions
+    return allRows
       .filter(tx => {
         const matchesSearch = searchTerm === '' ||
           getInvestorDisplayName(tx).toLowerCase().includes(searchTerm.toLowerCase()) ||
           (tx.startupName || '').toLowerCase().includes(searchTerm.toLowerCase());
-        
-        const matchesStatus = statusFilter === 'all' || tx.status === statusFilter;
-        
+        const matchesStatus = statusFilter === 'all' ||
+          tx.status === statusFilter ||
+          (statusFilter === 'PENDING' && tx.status === 'NEGOTIATING');
         const matchesDate = dateFilter === 'all' || (() => {
           const txDate = new Date(tx.transactionDate);
           const now = new Date();
@@ -215,7 +280,6 @@ const InvestmentsReceived = () => {
               return true;
           }
         })();
-
         return matchesSearch && matchesStatus && matchesDate;
       })
       .sort((a, b) => {
@@ -226,7 +290,7 @@ const InvestmentsReceived = () => {
           ? aValue < bValue ? -1 : 1
           : bValue < aValue ? -1 : 1;
       });
-  }, [transactions, searchTerm, statusFilter, dateFilter, orderBy, order]);
+  }, [allRows, searchTerm, statusFilter, dateFilter, orderBy, order]);
 
   const paginatedTransactions = filteredTransactions.slice(
     page * rowsPerPage,

@@ -349,23 +349,34 @@ const startupService = {
 
             // If only status is being updated, use the status endpoint
             if (offerData.status && Object.keys(offerData).length === 2 && offerData.startupId) {
-                const response = await axios.put(`${API_URL}/startups/${startupId}/offers/${offerId}/status?status=${offerData.status}`, {}, {
-                    headers: {
-                        'Authorization': `Bearer ${user.token}`,
-                        'Content-Type': 'application/json'
+                const response = await axios.put(
+                    `${API_URL}/startups/${startupId}/offers/${offerId}/status`, 
+                    null,
+                    {
+                        params: {
+                            status: offerData.status
+                        },
+                        headers: {
+                            'Authorization': `Bearer ${user.token}`,
+                            'Content-Type': 'application/json'
+                        }
                     }
-                });
+                );
                 console.log('Status update response:', response.data);
                 return { ...offerData, id: offerId }; // Return minimal response for status updates
             }
 
             // For other updates, use the main endpoint
-            const response = await axios.put(`${API_URL}/startups/${startupId}/offers/${offerId}`, offerData, {
-                headers: {
-                    'Authorization': `Bearer ${user.token}`,
-                    'Content-Type': 'application/json'
+            const response = await axios.put(
+                `${API_URL}/startups/${startupId}/offers/${offerId}`, 
+                offerData, 
+                {
+                    headers: {
+                        'Authorization': `Bearer ${user.token}`,
+                        'Content-Type': 'application/json'
+                    }
                 }
-            });
+            );
 
             console.log('Update offer response:', response.data);
 

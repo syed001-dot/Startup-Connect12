@@ -8,7 +8,7 @@ import {
   Box, 
   CircularProgress, 
   Alert,
-  Paper,
+  //Paper,
   Divider
 } from '@mui/material';
 import { 
@@ -28,6 +28,7 @@ const TransactionPage = () => {
   const [error, setError] = useState('');
   const [selectedOffer, setSelectedOffer] = useState(null);
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
+  const [success, setSuccess] = useState('');
 
   const fetchOffers = async () => {
     try {
@@ -119,6 +120,7 @@ const TransactionPage = () => {
         throw new Error('You must be logged in to negotiate offers');
       }
 
+      // First create the transaction
       await transactionService.createTransaction({
         investorId: user.id,
         startupId: offer.startupId || offer.startup?.id,
@@ -130,14 +132,19 @@ const TransactionPage = () => {
         offerId: offer.id
       });
       
-      // Update offer status to NEGOTIATING
-      await startupService.updateInvestmentOffer(offer.id, {
-        ...offer,
+      // Then update the offer status to NEGOTIATING
+      const updateData = {
         status: 'NEGOTIATING',
         startupId: offer.startupId || offer.startup?.id
-      });
+      };
+
+      await startupService.updateInvestmentOffer(offer.id, updateData);
       
-      await fetchOffers(); // Refresh the offers list
+      // Refresh the offers list
+      await fetchOffers();
+      
+      // Show success message
+      setSuccess('Negotiation started successfully');
     } catch (err) {
       console.error('Negotiation error:', err);
       setError(err.message || 'Failed to negotiate offer');

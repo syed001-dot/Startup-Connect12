@@ -32,7 +32,7 @@ import {
     Timeline as TimelineIcon,
     Info as InfoIcon,
     Edit as EditIcon,
-    Delete as DeleteIcon
+    //Delete as DeleteIcon
 } from '@mui/icons-material';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as ChartTooltip, Legend, ResponsiveContainer } from 'recharts';
 import investorService from '../services/investorService';

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Box, 
   Button, 
@@ -15,7 +15,64 @@ import BusinessIcon from '@mui/icons-material/Business';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import HandshakeIcon from '@mui/icons-material/Handshake';
 
+
+const sectorImageMap = {
+  Technology: '/Technology.jpg',
+  Healthcare: '/Healthcare.jpg',
+  Finance: '/Finance.jpg',
+  Education: '/Education.jpg',
+  Agriculture: '/Agriculture.jpg',
+  Manufacturing: '/manufacturing.jpg',
+  Retail: '/retail.jpg',
+  'Real Estate': '/real estate.jpg',
+  Energy: '/energy.jpg',
+  Transportation: '/transportation.jpg',
+  'Media & Entertainment': '/entertainment.jpg',
+  Other: '/other.jpg',
+};
+
+const getSectorImage = (sector) => {
+  if (!sector) return '/startup.jpg';
+  const normalized = sector.trim().toLowerCase();
+  for (const key in sectorImageMap) {
+    if (key.toLowerCase() === normalized) return sectorImageMap[key];
+    // Fuzzy match for partials
+    if (normalized.includes(key.toLowerCase()) || key.toLowerCase().includes(normalized)) return sectorImageMap[key];
+  }
+  return '/startup.jpg';
+};
+
+const carouselImages = ['/gmagr.jpg', '/investor.webp', '/startup.jpg'];
+
 const Home = () => {
+  const [startups, setStartups] = useState([]);
+  const [loading, setLoading] = useState(true);
+  // Carousel state
+  const [carouselIdx, setCarouselIdx] = useState(0);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCarouselIdx(idx => (idx + 1) % carouselImages.length);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+    import('../services/startupService').then(({ default: startupService }) => {
+      startupService.getAllStartups().then(data => {
+        if (mounted) {
+          setStartups(Array.isArray(data) ? data : []);
+          setLoading(false);
+        }
+      }).catch(() => {
+        if (mounted) {
+          setStartups([]);
+          setLoading(false);
+        }
+      });
+    });
+    return () => { mounted = false; };
+  }, []);
   return (
     <Box>
       {/* Hero Section */}
@@ -87,14 +144,19 @@ const Home = () => {
               </Stack>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Box 
+              {/* Simple Carousel */}
+              <Box
                 component="img"
-                src="/gmagr.jpg"
+                src={carouselImages[carouselIdx]}
                 alt="Startup and investor meeting"
                 sx={{
                   width: '100%',
+                  height: 320,
+                  objectFit: 'cover',
                   borderRadius: 2,
                   boxShadow: 10,
+                  transition: 'opacity 0.5s',
+                  background: '#e0e0e0',
                 }}
               />
             </Grid>
@@ -198,29 +260,61 @@ const Home = () => {
         </Typography>
         
         <Grid container spacing={4}>
-          {[1, 2, 3].map((item) => (
-            <Grid item key={item} xs={12} sm={6} md={4}>
-              <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                <CardMedia
-                  component="img"
-                  height="140"
-                  image={`/api/placeholder/400/200`}
-                  alt={`Startup ${item}`}
-                />
-                <CardContent sx={{ flexGrow: 1 }}>
-                  <Typography gutterBottom variant="h5" component="h3">
-                    Startup {item}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" gutterBottom>
-                    Technology • Seed Stage
-                  </Typography>
-                  <Typography variant="body2">
-                    A brief description of the startup and what they're building. This would include their unique value proposition.
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
+          {(loading ? Array(3).fill(null) : (startups.length >= 3 ? startups.slice(0, 3) : [...startups, ...Array(3 - startups.length).fill(null)])).map((startup, idx) => {
+            if (!startup) {
+              // Placeholder card
+              return (
+                <Grid item key={idx} xs={12} sm={6} md={4}>
+                  <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', opacity: 0.7 }}>
+                    <CardMedia
+                      component="img"
+                      height="140"
+                      image={getSectorImage('Other')}
+                      alt="Startup Placeholder"
+                    />
+                    <CardContent sx={{ flexGrow: 1 }}>
+                      <Typography gutterBottom variant="h5" component="h3">
+                        Startup
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" gutterBottom>
+                        Sector • Stage
+                      </Typography>
+                      <Typography variant="body2">
+                        Startup details unavailable.
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              );
+            }
+            const sector = startup.industry || startup.sector || startup.category || 'Other';
+            const stage = startup.fundingStage || startup.stage || 'Seed Stage';
+            const name = startup.startupName || startup.companyName || startup.name || 'Startup';
+            const desc = startup.description || 'No description provided.';
+            return (
+              <Grid item key={startup.id || idx} xs={12} sm={6} md={4}>
+                <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                  <CardMedia
+                    component="img"
+                    height="140"
+                    image={getSectorImage(sector)}
+                    alt={name}
+                  />
+                  <CardContent sx={{ flexGrow: 1 }}>
+                    <Typography gutterBottom variant="h5" component="h3">
+                      {name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" gutterBottom>
+                      {sector} • {stage}
+                    </Typography>
+                    <Typography variant="body2">
+                      {desc.length > 120 ? desc.slice(0, 117) + '...' : desc}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            );
+          })}
         </Grid>
         
         <Box sx={{ textAlign: 'center', mt: 4 }}>
