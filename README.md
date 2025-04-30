@@ -1,70 +1,155 @@
-# Getting Started with Create React App
+```mermaid
+erDiagram
+    User ||--o| StartupProfile : has
+    User ||--o| InvestorProfile : has
+    User ||--o{ Message : sends
+    User ||--o{ Message : receives
+    User ||--o{ Notification : has
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+    StartupProfile ||--o{ PitchDeck : owns
+    StartupProfile ||--o{ Transaction : receives_investment
+    StartupProfile ||--o{ InvestmentOffer : receives_offer
 
-## Available Scripts
+    InvestorProfile ||--o{ Transaction : makes_investment
+    InvestorProfile ||--o{ InvestmentOffer : makes_offer
 
-In the project directory, you can run:
+    User {
+        Long id PK
+        String email
+        String password
+        String fullName
+        UserRole role
+        DateTime createdAt
+        DateTime updatedAt
+    }
 
-### `npm start`
+    StartupProfile {
+        Long id PK
+        Long userId FK
+        String startupName
+        String description
+        String industry
+        String fundingStage
+        String teamSize
+        String website
+        DateTime createdAt
+        DateTime updatedAt
+    }
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+    InvestorProfile {
+        Long id PK
+        Long userId FK
+        String companyName
+        String sector
+        Double investmentRangeMin
+        Double investmentRangeMax
+        String location
+        String investmentFocus
+        Integer activeInvestmentsCount
+        String description
+        DateTime createdAt
+        DateTime updatedAt
+    }
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+    Transaction {
+        Long id PK
+        Long investorId FK
+        Long startupId FK
+        Double amount
+        String status
+        DateTime transactionDate
+        String transactionType
+        String description
+        Double proposedAmount
+        Double equityPercentage
+        String negotiationStatus
+        Integer negotiationRound
+        DateTime lastNegotiationDate
+        String negotiationNotes
+        Boolean isCounterOffer
+        String rejectionReason
+    }
 
-### `npm test`
+    PitchDeck {
+        Long id PK
+        Long startupId FK
+        String title
+        String description
+        String fileName
+        Long fileSize
+        String fileType
+        Byte[] fileContent
+        Integer version
+        Boolean isPublic
+        DateTime createdAt
+        DateTime updatedAt
+    }
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+    InvestmentOffer {
+        Long id PK
+        Long investorId FK
+        Long startupId FK
+        BigDecimal amount
+        BigDecimal equityPercentage
+        String description
+        String terms
+        BigDecimal remainingAmount
+        Boolean isActive
+        OfferStatus status
+        DateTime createdAt
+        DateTime updatedAt
+    }
 
-### `npm run build`
+    Message {
+        Long id PK
+        Long senderId FK
+        Long receiverId FK
+        DateTime timestamp
+    }
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+    Notification {
+        Long id PK
+        Long userId FK
+        DateTime date
+    }
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+# Startup Connect ER Diagram
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+This document contains the Entity-Relationship diagram for the Startup Connect application. The diagram is written in Mermaid format and can be rendered using any Mermaid-compatible viewer.
 
-### `npm run eject`
+## Relationships Overview
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+1. **User Relationships**
+   - A User can have one StartupProfile (for startup users)
+   - A User can have one InvestorProfile (for investor users)
+   - A User can send many Messages
+   - A User can receive many Messages
+   - A User can have many Notifications
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+2. **StartupProfile Relationships**
+   - A StartupProfile belongs to one User
+   - A StartupProfile can have many PitchDecks
+   - A StartupProfile can have many Transactions (as recipient)
+   - A StartupProfile can receive many InvestmentOffers
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+3. **InvestorProfile Relationships**
+   - An InvestorProfile belongs to one User
+   - An InvestorProfile can make many Transactions
+   - An InvestorProfile can make many InvestmentOffers
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Key Features
 
-## Learn More
+- The system supports both Startup and Investor user types through profiles
+- Investment process is tracked through Transactions and InvestmentOffers
+- Communication is facilitated through Messages
+- Users are notified of important events through Notifications
+- Startups can manage their pitch decks
+- Detailed tracking of investment negotiations and transactions
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## Notes
 
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- All timestamps are stored as DateTime
+- Files (like pitch decks) are stored with metadata and content
+- The system supports negotiation workflow through Transaction entity
+- Investment offers can have different statuses (ACTIVE, CLOSED, EXPIRED, NEGOTIATING) 
