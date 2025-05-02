@@ -103,7 +103,7 @@ function Register() {
     // Validate step 1
     if (activeStep === 0) {
       if (!formData.email || !formData.password || !formData.confirmPassword || !formData.fullName || !formData.role) {
-        setError('Please fill in all required fields');
+        setError('Please fill all required fields');
         return;
       }
       
