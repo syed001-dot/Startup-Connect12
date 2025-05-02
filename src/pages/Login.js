@@ -86,7 +86,7 @@ const Login = () => {
                         />
                     </Box>
                     <Typography component="h1" variant="h4" align="center" fontWeight={700} gutterBottom>
-                        Welcome Back
+                        Welcome
                     </Typography>
                     <Typography variant="subtitle1" align="center" color="text.secondary" sx={{ mb: 2 }}>
                         Sign in to your account
