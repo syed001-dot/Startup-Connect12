@@ -369,7 +369,7 @@ const InvestorDashboard = () => {
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <Notifications sx={{ fontSize: 30, color: 'primary.main', mr: 1 }} />
-                    <Typography variant="h6">Recent Activity</Typography>
+                    <Typography variant="h6">Recent Activities</Typography>
                   </Box>
                   {recentActivities.length > 4 && (
                     <Button
