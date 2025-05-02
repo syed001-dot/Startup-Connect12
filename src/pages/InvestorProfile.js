@@ -194,7 +194,7 @@ const InvestorProfile = () => {
                 ))}
               </List>
             ) : (
-              <Typography color="text.secondary">No recent investments available</Typography>
+              <Typography color="text.secondary">No Recent Investments Available</Typography>
             )}
           </Paper>
         </Grid>
