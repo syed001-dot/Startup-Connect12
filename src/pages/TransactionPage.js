@@ -272,7 +272,7 @@ const TransactionPage = () => {
                 color="text.secondary"
                 align="center"
               >
-                No investment offers available at the moment
+                No Investment Offers Available at the moment
               </Typography>
             </Box>
           ) : (
