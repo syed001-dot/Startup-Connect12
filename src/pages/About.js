@@ -32,7 +32,7 @@ const aboutSections = [
 
 const teamMembers = [
   {
-    name: 'SYED SUHAIL PASHA',
+    name: 'SYED SUHAIL PASHA M',
     role: 'Student',
     img: '/suhail.jpg',
     description: 'Studying at Dayananda Sagar College of Arts, Science and Commerce.'
