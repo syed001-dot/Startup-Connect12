@@ -123,7 +123,7 @@ const Portfolio = () => {
                         <CardContent>
                             <Box display="flex" alignItems="center" mb={2}>
                                 <AttachMoneyIcon color="primary" sx={{ mr: 1 }} />
-                                <Typography variant="h6">Total Investment</Typography>
+                                <Typography variant="h6">Total Investments</Typography>
                             </Box>
                             <Typography variant="h4">
                                 ${portfolio?.totalInvestment?.toLocaleString()}
@@ -136,7 +136,7 @@ const Portfolio = () => {
                         <CardContent>
                             <Box display="flex" alignItems="center" mb={2}>
                                 <BusinessIcon color="primary" sx={{ mr: 1 }} />
-                                <Typography variant="h6">Startups</Typography>
+                                <Typography variant="h6">StartUps</Typography>
                             </Box>
                             <Typography variant="h4">
                                 {portfolio?.numberOfStartups}
@@ -203,7 +203,7 @@ const Portfolio = () => {
                         <Table>
                             <TableHead>
                                 <TableRow>
-                                    <TableCell>Startup</TableCell>
+                                    <TableCell>StartUp</TableCell>
                                     <TableCell>Amount</TableCell>
                                     <TableCell>Date</TableCell>
                                     <TableCell>Stage</TableCell>
@@ -263,7 +263,7 @@ const Portfolio = () => {
             {/* Investment Details Dialog */}
             <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
                 <DialogTitle>
-                    Investment Details
+                    Investments Details
                     {!editMode && (
                         <IconButton
                             onClick={handleEditInvestment}
