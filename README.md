@@ -152,4 +152,4 @@ This document contains the Entity-Relationship diagram for the Startup Connect a
 - All timestamps are stored as DateTime
 - Files (like pitch decks) are stored with metadata and content
 - The system supports negotiation workflow through Transaction entity
-- Investment offers can have different statuses (ACTIVE, CLOSED, EXPIRED, NEGOTIATING) 
+- Investment offers can have different statuses (ACTIVE, CLOSED, EXPIRED, NEGOTIATION) 
