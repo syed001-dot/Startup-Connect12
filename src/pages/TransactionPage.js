@@ -206,7 +206,7 @@ const TransactionPage = () => {
               letterSpacing: '0.01em'
             }}
           >
-            Review and manage investment opportunities for this startup
+            Review and manage Investment opportunities for this Startup
           </Typography>
         </CardContent>
       </Card>
@@ -254,7 +254,7 @@ const TransactionPage = () => {
                 color="text.secondary"
                 sx={{ mt: 2 }}
               >
-                Loading investment offers...
+                Loading Investment offers...
               </Typography>
             </Box>
           ) : offers.length === 0 ? (
@@ -272,7 +272,7 @@ const TransactionPage = () => {
                 color="text.secondary"
                 align="center"
               >
-                No Investment Offers Available at the moment
+                No Investment Offers Available at the Moment
               </Typography>
             </Box>
           ) : (
