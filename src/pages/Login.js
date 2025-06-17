@@ -37,9 +37,9 @@ const Login = () => {
             // Redirect based on user role
             if (response.user.role === 'ADMIN') {
                 navigate('/admin-dashboard');
-            } else if (response.user.role === 'STARTUP') {
+            } else if (response.user.role === 'STARTUPS') {
                 navigate('/startup-dashboard');
-            } else if (response.user.role === 'INVESTOR') {
+            } else if (response.user.role === 'INVESTORS') {
                 navigate('/investor-dashboard');
             }
         } catch (err) {
