@@ -119,7 +119,7 @@ function Register() {
         return;
       }
       if (formData.password !== formData.confirmPassword) {
-        setError('Passwords do not match');
+        setError('Password do not match');
         return;
       }
     }
