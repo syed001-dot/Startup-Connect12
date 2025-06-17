@@ -277,7 +277,7 @@ const StartupDashboard = () => {
 
         {/* Notification Dialog */}
         <Dialog open={notificationDialogOpen} onClose={() => setNotificationDialogOpen(false)} maxWidth="xs" fullWidth>
-          <DialogTitle>Notifications</DialogTitle>
+          <DialogTitle>Notification</DialogTitle>
           <DialogContent>
             {notificationLoading ? (
               <Box display="flex" justifyContent="center" alignItems="center" minHeight="100px">
